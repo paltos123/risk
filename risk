@@ -1,0 +1,154 @@
+vlados paltos, [20.03.2025 12:50]
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Globalization;
+
+
+namespace calculatorrisk11
+{
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            try
+            {
+                Console.WriteLine("Программа расчета рисков информационной системы.");
+
+                // Ввод данных для риска утери информации о клиентах
+                Console.WriteLine("\nРасчет риска утери информации о клиентах:");
+                double companyValue1 = GetValidInput<double>("Введите общую стоимость компании (руб.): ", x => x > 0, "Стоимость компании должна быть положительной.");
+                double impactFactor1 = GetValidInput<double>("Введите фактор воздействия (в виде десятичной дроби, например, 0.5 для 50%): ", x => x >= 0 && x <= 1, "Фактор воздействия должен быть от 0 до 1.");
+                double probability1 = GetValidInput<double>("Введите вероятность происшествия (в виде десятичной дроби, например, 0.1 для 10%): ", x => x > 0 && x <= 1, "Вероятность должна быть больше 0 и не больше 1.");
+                double risk1 = CalculateRisk(companyValue1, impactFactor1, probability1);
+                Console.WriteLine($"Риск утери информации о клиентах: {risk1:C}");
+
+                // Ввод данных для риска отказа работы ПО
+                Console.WriteLine("\nРасчет риска отказа работы ПО на длительное время:");
+                double companyValue2 = GetValidInput<double>("Введите общую стоимость компании (руб.): ", x => x > 0, "Стоимость компании должна быть положительной.");
+                double impactFactor2 = GetValidInput<double>("Введите фактор воздействия (в виде десятичной дроби, например, 0.95 для 95%): ", x => x >= 0 && x <= 1, "Фактор воздействия должен быть от 0 до 1.");
+                double probability2 = GetValidInput<double>("Введите вероятность происшествия (в виде десятичной дроби, например, 0.1 для 10%): ", x => x > 0 && x <= 1, "Вероятность должна быть больше 0 и не больше 1.");
+                double risk2 = CalculateRisk(companyValue2, impactFactor2, probability2);
+                Console.WriteLine($"Риск отказа работы ПО на длительное время: {risk2:C}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка: {ex.Message}");
+            }
+
+            Console.WriteLine("\nНажмите любую клавишу для выхода.");
+            Console.ReadKey();
+        }
+
+vlados paltos, [20.03.2025 12:50]
+// Метод для получения валидного числового ввода
+        public static T GetValidInput<T>(string prompt, Func<double, bool> validationFunc, string errorMessage) where T : IConvertible
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+
+                // Заменяем запятую на точку для корректного парсинга
+                input = input.Replace(',', '.');
+
+                if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
+                {
+                    if (validationFunc(result))
+                    {
+                        return (T)Convert.ChangeType(result, typeof(T));
+                    }
+                    else
+                    {
+                        Console.WriteLine(errorMessage);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Неверный формат ввода. Пожалуйста, введите число.");
+                }
+            }
+        }
+
+        // Метод расчета риска
+        public static double CalculateRisk(double companyValue, double impactFactor, double probability)
+        {
+            if (companyValue <= 0)
+            {
+                throw new ArgumentException("Стоимость компании должна быть положительной.");
+            }
+            if (impactFactor < 0)
+            {
+                throw new ArgumentException("Фактор воздействия не может быть отрицательным.");
+            }
+            if (probability <= 0)
+            {
+                throw new ArgumentException("Вероятность должна быть больше нуля.");
+            }
+
+            // Расчет цены потерь (Q)
+            double lossCost = companyValue * impactFactor;
+
+            // Расчет величины риска (R)
+            double risk = probability * lossCost;
+
+            return risk;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+Владик а текс для нее?
+
+vlados paltos, [20.03.2025 13:06]
+using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using calculatorrisk11;
+
+namespace UnitTestProject1
+{
+    [TestClass]
+    public class ProgramTests
+    {
+        [TestMethod]
+        public void CalculateRisk_ValidInput_ReturnsExpectedValue()
+        {
+            // Arrange
+            double companyValue = 2000000;
+            double impactFactor = 0.5;
+            double probability = 0.5;
+            double expected = 500000;
+
+            // Act
+            double result = Program.CalculateRisk(companyValue, impactFactor, probability);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void CalculateRisk_ValidInput2_ReturnsExpectedValue()
+        {
+            // Arrange
+            double companyValue = 2000000;
+            double impactFactor = 0.95;
+            double probability = 0.1;
+            double expected = 190000;
+
+            // Act
+            double result = Program.CalculateRisk(companyValue, impactFactor, probability);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+    }
+}
